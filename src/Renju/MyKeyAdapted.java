@@ -28,6 +28,10 @@ public class MyKeyAdapted extends KeyAdapter {
             case '1':renju.SetModel(Renju.Model.PvP); break;
             case '2':renju.SetModel(Renju.Model.PvE);break;
             case '3':renju.SetModel(Renju.Model.EvE);break;
+            case '4':renju.SetFlagLong(true);break;
+            case '5':renju.SetFlagLong(false);break;
+            case '6':renju.SetFlagTwoAlive3(true);break;
+            case '7':renju.SetFlagTwoAlive3(false);break;
         }
 
     }
