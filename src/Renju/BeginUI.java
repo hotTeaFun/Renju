@@ -4,8 +4,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 class BeginUI extends Frame implements ActionListener,ItemListener {
-    boolean FlagLong;
-    boolean Flag3;
+    private boolean FlagLong;
+    private boolean Flag3;
 private final static Choice WhoFirst=new Choice();
     private final static Choice choice=new Choice();
     private final static Checkbox Long=new Checkbox("Long_ForbiddenHand",true);

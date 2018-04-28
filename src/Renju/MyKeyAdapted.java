@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-public class MyKeyAdapted extends KeyAdapter {
+class MyKeyAdapted extends KeyAdapter {
     private Renju renju;
 
     MyKeyAdapted(Renju renju) {
