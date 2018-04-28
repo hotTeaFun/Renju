@@ -46,7 +46,7 @@ public class MyMouseAdapted extends MouseAdapter {
         int[] re=Decide(x,y,Clicked).get();
         if(sqrt(pow((x+re[0])*R.per-Clicked.height,2)+pow((y+re[1])*R.per-Clicked.width,2))<R.Oval){
             int X=x-2+re[0];int Y=y-2+re[1];
-            if(R.Pieces[X][Y]== Renju.State.Empty){
+            if(X<15&&X>=0&&Y<15&&Y>=0&&R.Pieces[X][Y]== Renju.State.Empty){
                 R.DropPoint= new int[]{X, Y};
                 return true;
             }

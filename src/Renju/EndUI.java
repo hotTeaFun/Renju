@@ -19,7 +19,4 @@ private String Winner;
     public void paint(Graphics g) {
         g.drawString("GameOver!\nThe Winner is "+Winner,100,100);
     }
-
-
-
 }

@@ -34,19 +34,22 @@ private final static Choice WhoFirst=new Choice();
     }
     @Override
     public void paint(Graphics g) {
-        g.drawString("GameBegin!\nYou're supposed to be the winner!",190,100);
+        g.drawString("游戏开始",50,80);
+        g.drawString("按键介绍响应：1(设置模式为PVP)  2(设置模式为PVE)  3(设置模式为EVE)" ,30,100);
+                g.drawString("r(重启游戏)  s(交换黑白棋子)  c(投降)  e(结束游戏)",30,120);
     }
     @Override
     public void actionPerformed(ActionEvent e) {
         Renju renju=new Renju();
+        renju.Actor= WhoFirst.getSelectedIndex() != 0;
         switch (choice.getSelectedIndex()) {
             case 0:
                 renju.model = Renju.Model.PvE;
-                renju.Statement=false;
+                renju.Statement= renju.Actor;
                 break;
             case 1:
                 renju.model = Renju.Model.PvE;
-                renju.Statement=true;
+                renju.Statement= !renju.Actor;
                 break;
             case 2:
                 renju.model = Renju.Model.PvP;
@@ -65,7 +68,6 @@ private final static Choice WhoFirst=new Choice();
                 renju.Statement=true;
                 break;
         }
-   renju.Actor= WhoFirst.getSelectedIndex() != 0;
         renju.setTitle("Renju");
         renju.setSize(new Dimension(600,600));
         renju.setVisible(true);
