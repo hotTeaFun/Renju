@@ -44,27 +44,27 @@ private final static Choice WhoFirst=new Choice();
         renju.Actor= WhoFirst.getSelectedIndex() != 0;
         switch (choice.getSelectedIndex()) {
             case 0:
-                renju.model = Renju.Model.PvE;
-                renju.Statement= renju.Actor;
+                renju.SetModel(Renju.Model.PvE);
+                renju.Statement=renju.Actor;
                 break;
             case 1:
-                renju.model = Renju.Model.PvE;
-                renju.Statement= !renju.Actor;
+                renju.SetModel(Renju.Model.PvE);
+                renju.Statement=!renju.Actor;
                 break;
             case 2:
-                renju.model = Renju.Model.PvP;
+                renju.SetModel(Renju.Model.PvP);
                 renju.Statement=false;
                 break;
             case 3:
-                renju.model= Renju.Model.PvP;
+                renju.SetModel(Renju.Model.PvP);
                 renju.Statement=false;
                 break;
             case 4:
-                renju.model= Renju.Model.EvE;
+                renju.SetModel(Renju.Model.EvE);
                 renju.Statement=true;
                 break;
             case 5:
-                renju.model= Renju.Model.EvE;
+                renju.SetModel(Renju.Model.EvE);
                 renju.Statement=true;
                 break;
         }

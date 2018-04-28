@@ -25,9 +25,9 @@ public class MyKeyAdapted extends KeyAdapter {
             case 'c':renju.Capitulation();break;
             case 's':renju.Swap();break;
             case 'u':renju.Undo();break;
-            case '1':renju.model= Renju.Model.PvP;break;
-            case '2':renju.model= Renju.Model.PvE;break;
-            case '3':renju.model= Renju.Model.EvE;break;
+            case '1':renju.SetModel(Renju.Model.PvP); break;
+            case '2':renju.SetModel(Renju.Model.PvE);break;
+            case '3':renju.SetModel(Renju.Model.EvE);break;
         }
 
     }

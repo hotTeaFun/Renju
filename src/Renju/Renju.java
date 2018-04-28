@@ -26,6 +26,9 @@ public class Renju extends Frame {
     int[] ComputerJudge() {
         return new int[2];
     }
+    void SetModel(Model model){
+        this.model=model;
+    }
     void LaterAct(Graphics g) {
         g.setColor(Actor?WHITE:BLACK);
         g.fillOval((2+DropPoint[0])*per-Oval,(2+DropPoint[1])*per-Oval,Oval*2,Oval*2);

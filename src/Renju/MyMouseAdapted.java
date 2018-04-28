@@ -29,11 +29,11 @@ public class MyMouseAdapted extends MouseAdapter {
             default:
                 if(!R.Statement) {
                     if (PersonJudge(e))
-                        R.Statement = !R.Statement;
+                        R.Statement=!R.Statement;
                     else return;}
                else {
                         R.DropPoint = R.ComputerJudge();
-                        R.Statement = !R.Statement;
+                    R.Statement=!R.Statement;
                     }
                     R.LaterAct(R.getGraphics());
     }
