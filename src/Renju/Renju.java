@@ -121,11 +121,10 @@ public class Renju extends Frame {
             }
             if (Pieces[i + 1][j] == target&&Pieces[i + 3][j] == target&&Pieces[i + 4][j] == target) {
                 Flag[0][i + 1][j] = true;Flag[0][i + 3][j] = true;Flag[0][i + 4][j] = true;
-                if (Flag[1][i + 1][j] || Flag[2][i + 1][j] || Flag[3][i + 1][j] || Flag[1][i + 3][j] || Flag[2][i + 3][j] || Flag[3][i + 3][j] || Flag[1][i + 4][j] || Flag[2][i + 4][j] || Flag[3][i + 4][j])
-                    return true;
+                return Flag[1][i + 1][j] || Flag[2][i + 1][j] || Flag[3][i + 1][j] || Flag[1][i + 3][j] || Flag[2][i + 3][j] || Flag[3][i + 3][j] || Flag[1][i + 4][j] || Flag[2][i + 4][j] || Flag[3][i + 4][j];
             }
         }
-                 return false;
+        return false;
     }
 
     private boolean TraviseW(int i, int j, State target) {
@@ -133,7 +132,7 @@ public class Renju extends Frame {
         for (int k = 1; k < m + 1; k++)
             if (Pieces[i + k][j-k] == Opp)
                 return false;
-        if (Pieces[i][j] != State.Empty)
+        if (Pieces[i][j] != State.Empty||Pieces[i+m][j-m]!=State.Empty)
             return false;
         else {
             if (Pieces[i + 2][j-2] == target && Pieces[i + 3][j-3] == target && Pieces[i + 4][j-4] == target)
@@ -156,8 +155,7 @@ public class Renju extends Frame {
             }
             if (Pieces[i + 1][j-1] == target&&Pieces[i + 3][j-3] == target&&Pieces[i + 4][j-4] == target) {
                 Flag[3][i + 1][j-1] = true;Flag[3][i + 3][j-3] = true;Flag[3][i + 4][j-4] = true;
-                if (Flag[1][i + 1][j-1] || Flag[2][i + 1][j-1] || Flag[0][i + 1][j-1] || Flag[1][i + 3][j-3] || Flag[2][i + 3][j-3] || Flag[0][i + 3][j-3] || Flag[1][i + 4][j-4] || Flag[2][i + 4][j-4] || Flag[0][i + 4][j-4])
-                    return true;
+                return Flag[1][i + 1][j - 1] || Flag[2][i + 1][j - 1] || Flag[0][i + 1][j - 1] || Flag[1][i + 3][j - 3] || Flag[2][i + 3][j - 3] || Flag[0][i + 3][j - 3] || Flag[1][i + 4][j - 4] || Flag[2][i + 4][j - 4] || Flag[0][i + 4][j - 4];
             }
         }
         return false;
@@ -167,7 +165,7 @@ public class Renju extends Frame {
         for (int k = 1; k < m + 1; k++)
             if (Pieces[i][j+k] == Opp)
                 return false;
-        if (Pieces[i][j] != State.Empty)
+        if (Pieces[i][j] != State.Empty||Pieces[i][j-m]!=State.Empty)
             return false;
         else {
             if (Pieces[i][j+2] == target && Pieces[i][j+3] == target && Pieces[i][j+4] == target)
@@ -190,8 +188,7 @@ public class Renju extends Frame {
             }
             if (Pieces[i][j+1] == target&&Pieces[i][j+3] == target&&Pieces[i][j+4] == target) {
                 Flag[1][i][j+1] = true;Flag[1][i][j+3] = true;Flag[1][i][j+4] = true;
-                if (Flag[2][i][j+1] || Flag[3][i][j+1] || Flag[0][i][j+1] || Flag[2][i][j+3] || Flag[3][i][j+3] || Flag[0][i][j+3] || Flag[2][i][j+4] || Flag[3][i][j+4] || Flag[0][i][j+4])
-                    return true;
+                return Flag[2][i][j + 1] || Flag[3][i][j + 1] || Flag[0][i][j + 1] || Flag[2][i][j + 3] || Flag[3][i][j + 3] || Flag[0][i][j + 3] || Flag[2][i][j + 4] || Flag[3][i][j + 4] || Flag[0][i][j + 4];
             }
         }
         return false;
@@ -202,7 +199,7 @@ public class Renju extends Frame {
         for (int k = 1; k < m + 1; k++)
             if (Pieces[i + k][j+k] == Opp)
                 return false;
-        if (Pieces[i][j] != State.Empty)
+        if (Pieces[i][j] != State.Empty||Pieces[i+m][j+m]!=State.Empty)
             return false;
         else {
             if (Pieces[i + 2][j+2] == target && Pieces[i + 3][j+3] == target && Pieces[i + 4][j+4] == target)
@@ -225,8 +222,7 @@ public class Renju extends Frame {
             }
             if (Pieces[i + 1][j+1] == target&&Pieces[i + 3][j+3] == target&&Pieces[i + 4][j+4] == target) {
                 Flag[2][i + 1][j+1] = true;Flag[2][i + 3][j+3] = true;Flag[2][i + 4][j+4] = true;
-                if (Flag[1][i + 1][j+1] || Flag[3][i + 1][j+1] || Flag[0][i + 1][j+1] || Flag[1][i + 3][j+3] || Flag[3][i + 3][j+3] || Flag[0][i + 3][j+3] || Flag[1][i + 4][j+4] || Flag[3][i + 4][j+4] || Flag[0][i + 4][j+4])
-                    return true;
+                return Flag[1][i + 1][j + 1] || Flag[3][i + 1][j + 1] || Flag[0][i + 1][j + 1] || Flag[1][i + 3][j + 3] || Flag[3][i + 3][j + 3] || Flag[0][i + 3][j + 3] || Flag[1][i + 4][j + 4] || Flag[3][i + 4][j + 4] || Flag[0][i + 4][j + 4];
             }
         }
         return false;
