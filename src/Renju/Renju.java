@@ -70,70 +70,127 @@ public class Renju extends Frame {
     }
 
     private boolean HasTwoAlive3(State target) {
-        for (int i=0;i<n-m+1;i++)
+        for (int i=0;i<n-m;i++)
             for (int j=0;j<n;j++)
                 if(TraviseX(i,j,target))
                     return true;
         for (int i=0;i<n;i++)
-            for (int j=0;j<n-m+1;j++)
+            for (int j=0;j<n-m;j++)
                 if(TraviseY(i,j,target))
                     return true;
-        for (int i=0;i<n-m+1;i++)
-            for (int j=m-1;j<n;j++)
+        for (int i=0;i<n-m;i++)
+            for (int j=m;j<n;j++)
                 if(TraviseW(i,j,target))
                     return true;
-        for (int i=0;i<n-m+1;i++)
-            for (int j=0;j<n-m+1;j++)
+        for (int i=0;i<n-m;i++)
+            for (int j=0;j<n-m;j++)
                 if(TraviseZ(i,j,target))
                     return true;
+        for(int i=0;i<n;i++)
+            for (int j=0;j<n;j++){
+                for (int k=0;k<4;k++)
+                    Flag[k][i][j]=false;
+            }
         return false;
     }
 
     private boolean TraviseX(int i, int j, State target) {
-        int TargetSum=0 ,empty=0;
-        int[] flag=new int[m];
-        for (int k=0;k<m;k++){
-            if(Pieces[i+k][j]==target){flag[TargetSum++]=k;}
-            else if (Pieces[i+k][j]==State.Empty)empty++;
-        }
-        if(TargetSum==m-2&&empty==2){
-            for (int q=0;q<TargetSum;q++){
-                Flag[0][i+flag[q]][j]=true;
-                if(Flag[1][i+flag[q]][j]||Flag[2][i+ flag[q]][j]||Flag[3][i+ flag[q]][j])
+        State Opp =target==State.White?State.Black:State.White;
+        for (int k=1;k<m+1;k++)
+            if (Pieces[i + k][j] == Opp)
+                return false;
+        if (Pieces[i][j]!=State.Empty)
+            return false;
+        else {
+            if (Pieces[i+2][j]==target&&Pieces[i+3][j]==target&&Pieces[i+4][j]==target) {
+                Flag[0][i+2][j]=true;Flag[0][i+3][j]=true;Flag[0][i+4][j]=true;
+                if(Flag[1][i+2][j] || Flag[2][i+2][j] || Flag[3][i+2][j]||Flag[1][i+3][j] || Flag[2][i+3][j] || Flag[3][i+3][j]||Flag[1][i+4][j] || Flag[2][i+4][j] || Flag[3][i+4][j])
+                return true;
+            }
+            if (Pieces[i+1][j]==target&&Pieces[i+2][j]==target&&Pieces[i+3][j]==target)
+            {
+                Flag[0][i+1][j]=true;Flag[0][i+2][j]=true;Flag[0][i+3][j]=true;
+                if(Flag[1][i+1][j] || Flag[2][i+1][j] || Flag[3][i+1][j]||Flag[1][i+2][j] || Flag[2][i+2][j] || Flag[3][i+2][j]||Flag[1][i+3][j] || Flag[2][i+3][j] || Flag[3][i+3][j])
+                    return true;
+            }
+            if (Pieces[i+1][j]==target&&Pieces[i+2][j]==target&&Pieces[i+4][j]==target)
+            {
+                Flag[0][i+2][j]=true;Flag[0][i+1][j]=true;Flag[0][i+4][j]=true;
+                if(Flag[1][i+2][j] || Flag[2][i+2][j] || Flag[3][i+2][j]||Flag[1][i+1][j] || Flag[2][i+1][j] || Flag[3][i+1][j]||Flag[1][i+4][j] || Flag[2][i+4][j] || Flag[3][i+4][j])
+                    return true;
+            }
+            if (Pieces[i + 1][j] == target&&Pieces[i + 3][j] == target&&Pieces[i + 4][j] == target) {
+                Flag[0][i + 1][j] = true;Flag[0][i + 3][j] = true;Flag[0][i + 4][j] = true;
+                if (Flag[1][i + 1][j] || Flag[2][i + 1][j] || Flag[3][i + 1][j] || Flag[1][i + 3][j] || Flag[2][i + 3][j] || Flag[3][i + 3][j] || Flag[1][i + 4][j] || Flag[2][i + 4][j] || Flag[3][i + 4][j])
                     return true;
             }
         }
-        return false;
+                 return false;
     }
 
     private boolean TraviseW(int i, int j, State target) {
-        int TargetSum=0 ,empty=0;
-        int[] flag=new int[m];
-        for (int k=0;k<m;k++){
-            if(Pieces[i+k][j-k]==target){flag[TargetSum++]=k;}
-            else if (Pieces[i+k][j-k]==State.Empty)empty++;
-        }
-        if(TargetSum==m-2&&empty==2){
-            for (int q=0;q<TargetSum;q++){
-                Flag[2][i+flag[q]][j-flag[q]]=true;
-                if(Flag[0][i+flag[q]][j - flag[q]]||Flag[1][i+flag[q]][j -flag[q]]||Flag[3][i+flag[q]][j -flag[q]])
+        State Opp = target == State.White ? State.Black : State.White;
+        for (int k = 1; k < m + 1; k++)
+            if (Pieces[i + k][j-k] == Opp)
+                return false;
+        if (Pieces[i][j] != State.Empty)
+            return false;
+        else {
+            if (Pieces[i + 2][j-2] == target && Pieces[i + 3][j-3] == target && Pieces[i + 4][j-4] == target)
+            {
+                Flag[3][i+2][j-2]=true;Flag[3][i+3][j-3]=true;Flag[3][i+4][j-4]=true;
+                if(Flag[1][i+2][j-2] || Flag[2][i+2][j-2] || Flag[0][i+2][j-2]||Flag[1][i+3][j-3] || Flag[2][i+3][j-3] || Flag[0][i+3][j-3]||Flag[1][i+4][j-4] || Flag[2][i+4][j-4] || Flag[0][i+4][j-4])
+                    return true;
+            }
+            if (Pieces[i + 1][j-1] == target && Pieces[i + 2][j-2] == target && Pieces[i + 3][j-3] == target)
+            {
+                Flag[3][i+2][j-2]=true;Flag[3][i+3][j-3]=true;Flag[3][i+1][j-1]=true;
+                if(Flag[1][i+2][j-2] || Flag[2][i+2][j-2] || Flag[0][i+2][j-2]||Flag[1][i+3][j-3] || Flag[2][i+3][j-3] || Flag[0][i+3][j-3]||Flag[1][i+1][j-1] || Flag[2][i+1][j-1] || Flag[0][i+1][j-1])
+                    return true;
+            }
+            if (Pieces[i + 1][j-1] == target && Pieces[i + 2][j-2] == target && Pieces[i + 4][j-4] == target)
+            {
+                Flag[3][i+2][j-2]=true;Flag[3][i+1][j-1]=true;Flag[3][i+4][j-4]=true;
+                if(Flag[1][i+2][j-2] || Flag[2][i+2][j-2] || Flag[0][i+2][j-2]||Flag[1][i+1][j-1] || Flag[2][i+1][j-1] || Flag[0][i+1][j-1]||Flag[1][i+4][j-4] || Flag[2][i+4][j-4] || Flag[0][i+4][j-4])
+                    return true;
+            }
+            if (Pieces[i + 1][j-1] == target&&Pieces[i + 3][j-3] == target&&Pieces[i + 4][j-4] == target) {
+                Flag[3][i + 1][j-1] = true;Flag[3][i + 3][j-3] = true;Flag[3][i + 4][j-4] = true;
+                if (Flag[1][i + 1][j-1] || Flag[2][i + 1][j-1] || Flag[0][i + 1][j-1] || Flag[1][i + 3][j-3] || Flag[2][i + 3][j-3] || Flag[0][i + 3][j-3] || Flag[1][i + 4][j-4] || Flag[2][i + 4][j-4] || Flag[0][i + 4][j-4])
                     return true;
             }
         }
         return false;
     }
-
     private boolean TraviseY(int i, int j, State target) {
-        int TargetSum=0 ,empty=0;
-        int[] flag=new int[m];
-        for (int k=0;k<m;k++){
-            if(Pieces[i][j+k]==target){flag[TargetSum++]=k;}
-            else if (Pieces[i][j+k]==State.Empty)empty++;
-        }
-        if(TargetSum==m-2&&empty==2){
-            for (int q=0;q<TargetSum;q++){
-                Flag[1][i][j+flag[q]]=true;
-                if(Flag[0][i][j + flag[q]]||Flag[2][i][j + flag[q]]||Flag[3][i][j + flag[q]])
+        State Opp = target == State.White ? State.Black : State.White;
+        for (int k = 1; k < m + 1; k++)
+            if (Pieces[i][j+k] == Opp)
+                return false;
+        if (Pieces[i][j] != State.Empty)
+            return false;
+        else {
+            if (Pieces[i][j+2] == target && Pieces[i][j+3] == target && Pieces[i][j+4] == target)
+            {
+                Flag[1][i][j+2]=true;Flag[1][i][j+3]=true;Flag[1][i][j+4]=true;
+                if(Flag[2][i][j+2] || Flag[3][i][j+2] || Flag[0][i][j+2]||Flag[2][i][j+3] || Flag[3][i][j+3] || Flag[0][i][j+3]||Flag[2][i][j+4] || Flag[3][i][j+4] || Flag[0][i][j+4])
+                    return true;
+            }
+            if (Pieces[i][j+1] == target && Pieces[i][j+2] == target && Pieces[i][j+3] == target)
+            {
+                Flag[1][i][j+2]=true;Flag[1][i][j+3]=true;Flag[1][i][j+1]=true;
+                if(Flag[2][i][j+2] || Flag[3][i][j+2] || Flag[0][i][j+2]||Flag[2][i][j+3] || Flag[3][i][j+3] || Flag[0][i][j+3]||Flag[2][i][j+1] || Flag[3][i][j+1] || Flag[0][i][j+1])
+                    return true;
+            }
+            if (Pieces[i][j+1] == target && Pieces[i][j+2] == target && Pieces[i][j+4] == target)
+            {
+                Flag[1][i][j+2]=true;Flag[1][i][j+1]=true;Flag[1][i][j+4]=true;
+                if(Flag[3][i][j+2] || Flag[2][i][j+2] || Flag[0][i][j+2]||Flag[3][i][j+1] || Flag[2][i][j+1] || Flag[0][i][j+1]||Flag[3][i][j+4] || Flag[2][i][j+4] || Flag[0][i][j+4])
+                    return true;
+            }
+            if (Pieces[i][j+1] == target&&Pieces[i][j+3] == target&&Pieces[i][j+4] == target) {
+                Flag[1][i][j+1] = true;Flag[1][i][j+3] = true;Flag[1][i][j+4] = true;
+                if (Flag[2][i][j+1] || Flag[3][i][j+1] || Flag[0][i][j+1] || Flag[2][i][j+3] || Flag[3][i][j+3] || Flag[0][i][j+3] || Flag[2][i][j+4] || Flag[3][i][j+4] || Flag[0][i][j+4])
                     return true;
             }
         }
@@ -141,16 +198,34 @@ public class Renju extends Frame {
     }
 
     private boolean TraviseZ(int i, int j, State target) {
-        int TargetSum=0 ,empty=0;
-        int[] flag=new int[m];
-        for (int k=0;k<m;k++){
-            if(Pieces[i+k][j+k]==target){flag[TargetSum++]=k;}
-            else if (Pieces[i+k][j+k]==State.Empty)empty++;
-        }
-        if(TargetSum==m-2&&empty==2){
-            for (int q=0;q<TargetSum;q++){
-                Flag[2][i+flag[q]][j+flag[q]]=true;
-                if(Flag[0][i+flag[q]][j + flag[q]]||Flag[1][i+flag[q]][j + flag[q]]||Flag[3][i+flag[q]][j + flag[q]])
+        State Opp = target == State.White ? State.Black : State.White;
+        for (int k = 1; k < m + 1; k++)
+            if (Pieces[i + k][j+k] == Opp)
+                return false;
+        if (Pieces[i][j] != State.Empty)
+            return false;
+        else {
+            if (Pieces[i + 2][j+2] == target && Pieces[i + 3][j+3] == target && Pieces[i + 4][j+4] == target)
+            {
+                Flag[2][i+2][j+2]=true;Flag[2][i+3][j+3]=true;Flag[2][i+4][j+4]=true;
+                if(Flag[1][i+2][j+2] || Flag[3][i+2][j+2] || Flag[0][i+2][j+2]||Flag[1][i+3][j+3] || Flag[3][i+3][j+3] || Flag[0][i+3][j+3]||Flag[1][i+4][j+4] || Flag[3][i+4][j+4] || Flag[0][i+4][j+4])
+                    return true;
+            }
+            if (Pieces[i + 1][j+1] == target && Pieces[i + 2][j+2] == target && Pieces[i + 3][j+3] == target)
+            {
+                Flag[2][i+2][j+2]=true;Flag[2][i+3][j+3]=true;Flag[2][i+1][j+1]=true;
+                if(Flag[1][i+2][j+2] || Flag[3][i+2][j+2] || Flag[0][i+2][j+2]||Flag[1][i+3][j+3] || Flag[3][i+3][j+3] || Flag[0][i+3][j+3]||Flag[1][i+1][j+1] || Flag[3][i+1][j+1] || Flag[0][i+1][j+1])
+                    return true;
+            }
+            if (Pieces[i + 1][j+1] == target && Pieces[i + 2][j+2] == target && Pieces[i + 4][j+4] == target)
+            {
+                Flag[2][i+2][j+2]=true;Flag[2][i+1][j+1]=true;Flag[2][i+4][j+4]=true;
+                if(Flag[1][i+2][j+2] || Flag[3][i+2][j+2] || Flag[0][i+2][j+2]||Flag[1][i+1][j+1] || Flag[3][i+1][j+1] || Flag[0][i+1][j+1]||Flag[1][i+4][j+4] || Flag[3][i+4][j+4] || Flag[0][i+4][j+4])
+                    return true;
+            }
+            if (Pieces[i + 1][j+1] == target&&Pieces[i + 3][j+3] == target&&Pieces[i + 4][j+4] == target) {
+                Flag[2][i + 1][j+1] = true;Flag[2][i + 3][j+3] = true;Flag[2][i + 4][j+4] = true;
+                if (Flag[1][i + 1][j+1] || Flag[3][i + 1][j+1] || Flag[0][i + 1][j+1] || Flag[1][i + 3][j+3] || Flag[3][i + 3][j+3] || Flag[0][i + 3][j+3] || Flag[1][i + 4][j+4] || Flag[3][i + 4][j+4] || Flag[0][i + 4][j+4])
                     return true;
             }
         }
@@ -296,7 +371,7 @@ Renju(){
         endUI.setVisible(true);
     }
     private void ForbiddenHand(){
-        EndUI endUI=new EndUI(this,!Actor?"Black":"White");
+        EndUI endUI=new EndUI(this,Forbidden?"Black":"White");
         endUI.setTitle(!Forbidden?"Black is in a forbidden hand":"White is in a forbidden hand");
         endUI.setSize(new Dimension(400,400));
         endUI.setVisible(true);
