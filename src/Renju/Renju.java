@@ -12,6 +12,8 @@ public class Renju extends Frame {
     private final static Color WHITE=new Color(0xDFE1D7);
     private final static int m=5;//储存五子棋的5
     private final static int n=15;//棋盘行列数（标准15×15）
+    private static int[][] WhileBodyX;
+    private static int[][] WhileBodyY;
     enum Model{PvP,PvE,EvE}//模式(分别对应人人，人机，机机)
     Model model;
     volatile int[] DropPoint;//储存落子点坐标（X=DropPoint[0],Y=DropPoint[1]）
@@ -42,6 +44,24 @@ public class Renju extends Frame {
     private void SetWinPoint(int[] WinPiece){
         this.WinPiece[0]=WinPiece[0];
         this.WinPiece[1]=WinPiece[1];
+    }
+    private int[] get(int flag,int arg){
+        int[] re=new int[2];
+        switch (flag){
+            case 0:
+                re= new int[]{arg,0};
+                break;
+            case 1:
+                re= new int[]{0,arg};
+                break;
+            case 2:
+                re= new int[]{arg, arg};
+                break;
+            case 3:
+                re= new int[]{arg, -arg};
+                break;
+        }
+        return re;
     }
     void LaterAct(Graphics g) {
         g.setColor(Actor?WHITE:BLACK);
@@ -165,7 +185,7 @@ public class Renju extends Frame {
         for (int k = 1; k < m + 1; k++)
             if (Pieces[i][j+k] == Opp)
                 return false;
-        if (Pieces[i][j] != State.Empty||Pieces[i][j-m]!=State.Empty)
+        if (Pieces[i][j] != State.Empty||Pieces[i][j+m]!=State.Empty)
             return false;
         else {
             if (Pieces[i][j+2] == target && Pieces[i][j+3] == target && Pieces[i][j+4] == target)
@@ -236,52 +256,20 @@ public class Renju extends Frame {
     }
 
     private State Win() {
-        for (int i=0;i<n-m+1;i++)
-            for (int j=0;j<n;j++)
-                if(XWin(i,j)!=State.Empty) {
-            SetWinPoint(new int[]{i+m,j});
-            return XWin(i,j);}
-        for (int i=0;i<n;i++)
-            for (int j=0;j<n-m+1;j++)
-                if(YWin(i,j)!=State.Empty) {
-                    SetWinPoint(new int[]{i,j+m});
-                    return YWin(i,j);}
-        for (int i=0;i<n-m+1;i++)
-            for (int j=m-1;j<n;j++)
-                if(WWin(i,j)!=State.Empty) {
-                    SetWinPoint(new int[]{i+m,j-m});
-                    return WWin(i,j);}
-        for (int i=0;i<n-m+1;i++)
-            for (int j=0;j<n-m+1;j++)
-                if(ZWin(i,j)!=State.Empty) {
-            SetWinPoint(new int[]{i+m,j+m});
-                    return ZWin(i,j);}
-        return State.Empty;
-    }
-    private State XWin(int i, int j) {
-        int flag=1;
-        for(int k=1;k<m;k++)
-        if(Pieces[i][j]==Pieces[i+k][j])flag++;
-        return flag==m?Pieces[i][j]:State.Empty;
-    }
-    private State YWin(int i, int j){
-        int flag=1;
-        for(int k=1;k<m;k++)
-            if(Pieces[i][j]==Pieces[i][j+k])flag++;
-        return flag==m?Pieces[i][j]:State.Empty;
-    }
-    private State ZWin(int i, int j) {
-        int flag=1;
-        for(int k=1;k<m;k++)
-            if(Pieces[i][j]==Pieces[i+k][j+k])flag++;
-        return flag==m?Pieces[i][j]:State.Empty;
-    }
-    private State WWin(int i, int j) {
-        int flag=1;
-        for(int k=1;k<m;k++)
-            if(Pieces[i][j]==Pieces[i+k][j-k])flag++;
-        return flag==m?Pieces[i][j]:State.Empty;
-    }
+        for (int flag = 0; flag < 4; flag++)
+            for (int i = WhileBodyX[flag][0]; i < WhileBodyX[flag][1]; i++)
+                for (int j = WhileBodyY[flag][0]; j < WhileBodyY[flag][1]; j++) {
+                    if (Pieces[i][j] == State.Empty) continue;
+                    for (int k = 1, flag0 = 1; k < m; k++) {
+                        if (Pieces[i][j] == Pieces[i + get(flag, k)[0]][j + get(flag, k)[1]]) flag0++;
+                        if (flag0 == m) {
+                            SetWinPoint(new int[]{i + get(flag, m)[0], j + get(flag, m)[1]});
+                            return Pieces[i][j];
+                        }
+                    }
+                }
+                   return State.Empty;
+                }
     public static void main(String[] args){
         BeginUI Begin=new BeginUI();
         Begin.setTitle("The Begin Page");
@@ -292,8 +280,18 @@ Renju(){
     setBackground(new Color(127, 190, 255));
      Pieces=new State[n][n];
      Flag=new boolean[4][n][n];
+    WhileBodyX=new int[4][2];
+    WhileBodyY=new int[4][2];
+     for (int i=0;i<4;i++)
+     {
+         WhileBodyX[i][0]=0;
+         WhileBodyX[i][1]= i!=1 ? n-m-1:n;
+         WhileBodyY[i][0]= i!=3 ? 0:m-1;
+         WhileBodyY[i][1]= i<3&&i>0 ? n-m-1:n;
+     }
      DropPoint=new int[2];
      WinPiece=new int[2];
+
      PointsRecord=new LinkedList<>();
      for(int i=0;i<n;i++)
          for (int j=0;j<n;j++){
