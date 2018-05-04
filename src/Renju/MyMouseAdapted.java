@@ -10,7 +10,7 @@ import static java.lang.StrictMath.pow;
 import static java.lang.StrictMath.sqrt;
 
 class MyMouseAdapted extends MouseAdapter {
-    private Renju R;
+    private final Renju R;
     MyMouseAdapted(Renju R){
         this.R=R;
     }

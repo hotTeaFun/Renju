@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 class EndUI extends Frame{
-private String Winner;
+private final String Winner;
     EndUI(Renju P,String Winner){
         this.Winner=Winner;
         P.dispose();

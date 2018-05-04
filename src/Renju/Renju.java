@@ -3,6 +3,7 @@ package Renju;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import static java.lang.Integer.min;
@@ -19,7 +20,7 @@ public class Renju extends Frame {
     enum Model{PvP,PvE,EvE}//模式(分别对应人人，人机，机机)
     Model model;
     volatile int[] DropPoint;//储存落子点坐标（X=DropPoint[0],Y=DropPoint[1]）
-    private volatile LinkedList<int[]> PointsRecord;//储存对弈落子情况
+    private final LinkedList<int[]> PointsRecord;//储存对弈落子情况
     volatile boolean Statement;//储存当前棋手（0人1机）
     boolean Forbidden;//储存禁手方（0黑1白）
     private boolean FlagLong;//储存是否有长连禁手
@@ -32,6 +33,16 @@ public class Renju extends Frame {
     State[][] Pieces;//储存棋盘状态
     private boolean[][][] Flag;//标识活三的位置
     int[] ComputerJudge() {
+        State Current =Actor?State.White:State.Black;
+        ArrayList<int[]> Strength=new ArrayList<>();
+        for(int i=0;i<n;i++)
+            for (int j=0;j<n;j++)
+                if (Pieces[i][j]==Current)
+                    Strength.add(new int[]{i, j});
+        for (int[] Points:Strength){
+
+        }
+
         return new int[2];
     }
     void SetFlagLong(boolean FlagLong) {
@@ -101,45 +112,41 @@ private int[] get3(int flag){
         case 3:
             return new int[]{0,1, 2};
     }
-    return new int[]{1, 2, 3};
+    return new int[]{};
 }
     private boolean HasTwoAlive3(State target) {
         int[][] P=new int[][]{{1, 2, 3}, {1, 2, 4},{2, 3, 4}};
-      //  boolean Flag0=true;
         State Opp =target==State.White?State.Black:State.White;
         for (int flag=0;flag<4;flag++)
             for (int i = HasX[flag][0]; i < HasX[flag][1]; i++)
               for (int j = HasY[flag][0]; j < HasY[flag][1]; j++)
               {int Flag0=0;
-                  for (int k=1;k<m+1;k++)
+                  for (int k=0;k<m+1;k++)
                   if (Pieces[i+get(flag,k)[0]][j+get(flag,k)[1]] == Opp)
                  {Flag0=1;break;}
               if (Flag0==1)continue;
                 if (Pieces[i][j]==State.Empty&&Pieces[i+get(flag,m)[0]][j+get(flag,m)[1]]==State.Empty)
                 {
-                        for (int m=0;m<3;m++) {
-                            boolean Judge = true;
-                            for (int n = 0; n < 3; n++)
-                                if (Pieces[i + get(flag, P[m][n])[0]][j + get(flag, P[m][n])[1]] != target) {
-                                    Judge = false;
-                                    break;
-                                }
-                            if (Judge){
-                                // if (Pieces[i + get(flag,P[m][0])[0]][j+ get(flag,P[m][0])[1]] == target && Pieces[i+ get(flag,P[m][1])[0]][j+ get(flag,P[m][1])[1]] == target && Pieces[i+ get(flag,P[m][2])[0]][j+get(flag,P[m][2])[1]] == target) {
-                                for (int i1 = 0; i1 < 3; i1++)
-                                    Flag[flag][i + get(flag, P[m][i1])[0]][j + get(flag, P[m][i1])[1]] = true;
-                                for (int i1 = 0; i1 < 3; i1++)
-                                    if (Flag[get3(flag)[i1]][i + get(flag, P[m][i1])[0]][j + get(flag, P[m][i1])[1]])
-                                        return true;
-                            }
+                    int Judge = 0;
+                    int Symbol=0;
+                        for (int k=1;k<m;k++)
+                                if (Pieces[i + get(flag,k)[0]][j + get(flag, k)[1]] == State.Empty)
+                                {Judge++;Symbol=k;}
+                                if (Judge==1)
+                                {
+                                    for (int i1 = 0; i1 < 4; i1++)
+                                    {  if(Symbol-1!=i1){ Flag[flag][i + get(flag, i1)[0]][j + get(flag, i1)[1]] = true;
+                                    for (int i2 = 0; i2 < 3; i2++)
+                                        if (Flag[get3(flag)[i2]][i + get(flag, i1)[0]][j + get(flag, i1)[1]] )
+                                            return true;}
+                                    }
                         }
                 }
         }
         for(int i=0;i<n;i++)
-            for (int j=0;j<n;j++){
+            for (int j=0;j<n;j++)
                 for (int k=0;k<4;k++)
                     Flag[k][i][j]=false;
-            }
         return false;
     }
     private void GameOver(Renju.State winner) {

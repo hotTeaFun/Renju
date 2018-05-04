@@ -5,7 +5,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 class MyKeyAdapted extends KeyAdapter {
-    private Renju renju;
+    private final Renju renju;
 
     MyKeyAdapted(Renju renju) {
         this.renju = renju;
