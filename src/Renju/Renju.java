@@ -134,8 +134,8 @@ private int[] get3(int flag){
                                 {Judge++;Symbol=k;}
                                 if (Judge==1)
                                 {
-                                    for (int i1 = 0; i1 < 4; i1++)
-                                    {  if(Symbol-1!=i1){ Flag[flag][i + get(flag, i1)[0]][j + get(flag, i1)[1]] = true;
+                                    for (int i1 = 1; i1 < m; i1++)
+                                    {  if(Symbol!=i1){ Flag[flag][i + get(flag, i1)[0]][j + get(flag, i1)[1]] = true;
                                     for (int i2 = 0; i2 < 3; i2++)
                                         if (Flag[get3(flag)[i2]][i + get(flag, i1)[0]][j + get(flag, i1)[1]] )
                                             return true;}
