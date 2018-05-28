@@ -10,9 +10,11 @@ import static java.lang.StrictMath.pow;
 import static java.lang.StrictMath.sqrt;
 
 class MyMouseAdapted extends MouseAdapter {
-    private final Renju R;
+    private  Renju R;
+    private Renju.PiecesDetails piecesDetails;
     MyMouseAdapted(Renju R){
         this.R=R;
+        this.piecesDetails=R.new PiecesDetails();
     }
 
     @Override
@@ -20,11 +22,11 @@ class MyMouseAdapted extends MouseAdapter {
         switch (R.model){
             case PvP:
                     if(PersonJudge(e))
-                    R.LaterAct(R.getGraphics());
+                    R.LaterAct(R.getGraphics(),piecesDetails);
                     break;
             case EvE:
-                    R.DropPoint=R.ComputerJudge();
-                    R.LaterAct(R.getGraphics());
+                    R.DropPoint=R.ComputerJudge(piecesDetails);
+                    R.LaterAct(R.getGraphics(),piecesDetails);
                     break;
             default:
                 if(!R.Statement) {
@@ -32,10 +34,10 @@ class MyMouseAdapted extends MouseAdapter {
                         R.Statement=!R.Statement;
                     else return;}
                else {
-                        R.DropPoint = R.ComputerJudge();
+                        R.DropPoint = R.ComputerJudge(piecesDetails);
                     R.Statement=!R.Statement;
                     }
-                    R.LaterAct(R.getGraphics());
+                    R.LaterAct(R.getGraphics(),piecesDetails);
     }
     }
 
