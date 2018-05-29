@@ -11,22 +11,22 @@ import static java.lang.StrictMath.sqrt;
 
 class MyMouseAdapted extends MouseAdapter {
     private  Renju R;
-    private Renju.PiecesDetails piecesDetails;
     MyMouseAdapted(Renju R){
         this.R=R;
-        this.piecesDetails=R.new PiecesDetails();
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        Renju.PiecesDetails piecesDetailA= R.new PiecesDetails();
+        Renju.PiecesDetails piecesDetailD= R.new PiecesDetails();
         switch (R.model){
             case PvP:
                     if(PersonJudge(e))
-                    R.LaterAct(R.getGraphics(),piecesDetails);
+                    R.LaterAct(R.getGraphics(),piecesDetailA);
                     break;
             case EvE:
-                    R.DropPoint=R.ComputerJudge(piecesDetails);
-                    R.LaterAct(R.getGraphics(),piecesDetails);
+                    R.DropPoint=R.ComputerJudge(piecesDetailA,piecesDetailD);
+                    R.LaterAct(R.getGraphics(),piecesDetailA);
                     break;
             default:
                 if(!R.Statement) {
@@ -34,10 +34,10 @@ class MyMouseAdapted extends MouseAdapter {
                         R.Statement=!R.Statement;
                     else return;}
                else {
-                        R.DropPoint = R.ComputerJudge(piecesDetails);
+                        R.DropPoint = R.ComputerJudge(piecesDetailA,piecesDetailD);
                     R.Statement=!R.Statement;
                     }
-                    R.LaterAct(R.getGraphics(),piecesDetails);
+                    R.LaterAct(R.getGraphics(),piecesDetailA);
     }
     }
 
