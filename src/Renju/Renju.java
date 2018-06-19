@@ -5,6 +5,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
 
 import static java.lang.Integer.min;
 
@@ -32,6 +33,31 @@ public class Renju extends Frame {
     enum State {Empty, Black, White}//对应三种不同状态
 
     State[][] Pieces;//储存棋盘状态
+    int[][] PiecesInt;//将棋盘状态传入ｊｎｉ的媒介（0==Empty;-1==White;1==Black）
+    private boolean IsAhead;//标志电脑是否在向前演算
+    private State[][] PiecesBak;
+    private boolean ActorBak;
+    private boolean StatementBak;
+
+    static {
+        System.loadLibrary("AI");
+    }
+
+    public static native int[] AI();
+
+    void StartAhead() {
+        IsAhead = true;
+        ActorBak = Actor;
+        StatementBak = Statement;
+        PiecesBak = Pieces.clone();
+    }
+
+    void StopAhead() {
+        IsAhead = false;
+        Actor = ActorBak;
+        Statement = StatementBak;
+        Pieces = PiecesBak.clone();
+    }
 
     public static void main(String[] args) {
         BeginUI Begin = new BeginUI();
@@ -41,8 +67,9 @@ public class Renju extends Frame {
     }
 
     Renju() {
-        setBackground(new Color(127, 190, 255));
+        setBackground(new Color(136, 97, 35));
         Pieces = new State[n][n];
+        PiecesBak = new State[n][n];
         HasX = new int[4][2];
         HasY = new int[4][2];
         for (int i = 0; i < 4; i++) {
@@ -59,6 +86,7 @@ public class Renju extends Frame {
             }
         model = Model.PvP;//默认模式为人机
         Actor = false;//默认先手为黑方
+        IsAhead = false;
         Statement = true;
         addMouseListener(new MyMouseAdapted(this));
         addWindowListener(new WindowAdapter() {
@@ -106,11 +134,11 @@ public class Renju extends Frame {
 
     //储存扫描棋盘后的详细信息
     class PiecesDetails {
-        Boolean AFlush6, AAlive4, AAlive3, AFlush3, AFlush4;
-        ArrayList<int[]> Forbidden, Two3P, AFlush6P, AALive4P, AFlush4P, AALive3P, AFlush3P, AAlive2P, AAlive1P;
+        Boolean WinFlag, LongForFlag, AFlush6, AAlive4, AAlive3, AFlush3, AFlush4;
+        ArrayList<int[]> Forbidden, Two3P, AFlush6P, AALive4P, AFlush4P, AALive3P, AFlush3P,AFlush2P, AAlive2P, AAlive1P;
 
         PiecesDetails() {
-            AAlive3 = AFlush3 = AAlive4 = AFlush4 = AFlush6 = false;
+            WinFlag = LongForFlag = AAlive3 = AFlush3 = AAlive4 = AFlush4 = AFlush6 = false;
             Forbidden = new ArrayList<>();
             AFlush6P = new ArrayList<>();
             AALive4P = new ArrayList<>();
@@ -118,14 +146,33 @@ public class Renju extends Frame {
             AALive3P = new ArrayList<>();
             AFlush3P = new ArrayList<>();
             AAlive2P = new ArrayList<>();
+            AFlush2P=new ArrayList<>();
             AAlive1P = new ArrayList<>();
             Two3P = new ArrayList<>();
         }
 
-        boolean AFlush64(int[] check) {
-            for (int[] text : Forbidden
+        boolean Check(int[] check, ArrayList<int[]> Text, final int a, final int b, final int c, final int d) {
+            for (int[] text : Text
+                    ) {
+                if (text[a] == check[c] && text[b] == check[d])
+                    return false;
+            }
+            return true;
+        }
+
+        boolean Check32(int[] check, ArrayList<int[]> Text) {
+            for (int[] text : Text
                     ) {
                 if (text[0] == check[0] && text[1] == check[1])
+                    return false;
+            }
+            return true;
+        }
+
+        boolean Check3(int[] check, ArrayList<int[]> Text) {
+            for (int[] text : Text
+                    ) {
+                if (text[0] != check[0] && text[1] == check[1] && text[2] == check[2])
                     return false;
             }
             return true;
@@ -147,18 +194,28 @@ public class Renju extends Frame {
                     }
                     switch (Cc) {
                         case 6:
-                            if (Actor == Forbidden && FlagLong)
-                                ForbiddenHand();
-                            else GameOver(current);
+                            if (Actor == Forbidden && FlagLong) {
+                                if (!IsAhead) ForbiddenHand();
+                                else piecesDetails.LongForFlag = true;
+                            } else {
+                                if (!IsAhead) GameOver(current);
+                                else piecesDetails.WinFlag = true;
+                            }
                             break;
                         case 5:
                             if (Pieces[i][j] != current) {
-                                if (Actor != Forbidden || !FlagLong || i + get(flag, m + 1)[0] == n + 1 || j + get(flag, m + 1)[1] == -1 || j + get(flag, m + 1)[1] == n + 1 || Pieces[i + get(flag, m + 1)[0]][j + get(flag, m + 1)[1]] != current)
-                                    GameOver(current);
-                                else ForbiddenHand();
+                                if (Actor != Forbidden || !FlagLong || i + get(flag, m + 1)[0] == n + 1 || j + get(flag, m + 1)[1] == -1 || j + get(flag, m + 1)[1] == n + 1 || Pieces[i + get(flag, m + 1)[0]][j + get(flag, m + 1)[1]] != current) {
+                                    if (!IsAhead) GameOver(current);
+                                    else piecesDetails.WinFlag = true;
+                                } else {
+                                    if (!IsAhead) ForbiddenHand();
+                                    else piecesDetails.LongForFlag = true;
+                                }
                             }
-                            if (Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] != current)
-                                GameOver(current);
+                            if (Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] != current) {
+                                if (!IsAhead) GameOver(current);
+                                else piecesDetails.WinFlag = true;
+                            }
                             if (Pieces[i][j] == current && Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == current && Ec == 1) {
                                 int Symbol = 0;
                                 while (++Symbol < m)
@@ -183,7 +240,7 @@ public class Renju extends Frame {
                                         piecesDetails.AFlush3 = true;
                                         for (int q = 0; q <= m; q++)
                                             if (Pieces[i + get(flag, q)[0]][j + get(flag, q)[1]] == State.Empty)
-                                                piecesDetails.AFlush3P.add(flag, new int[]{i + get(flag, q)[0], j + get(flag, q)[1]});
+                                                piecesDetails.AFlush3P.add(new int[]{flag, i + get(flag, q)[0], j + get(flag, q)[1]});
                                         break;
                                     }
                                 case 3:
@@ -193,6 +250,7 @@ public class Renju extends Frame {
                                             if (Actor == Forbidden && FlagTwoAlive3 && Pieces[i + get(flag, s)[0]][j + get(flag, s)[1]] == current)
                                                 piecesDetails.Two3P.add(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]});
                                             if (Pieces[i + get(flag, s)[0]][j + get(flag, s)[1]] == State.Empty)
+//                                                if (piecesDetails.Check3(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]}, piecesDetails.AALive3P))
                                                 piecesDetails.AALive3P.add(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]});
                                         }
                                     }
@@ -227,20 +285,20 @@ public class Renju extends Frame {
                         case 4:
                             if (Pieces[i][j] == State.Empty && Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == State.Empty) {
                                 if (Actor == Forbidden && FlagLong) {
-                                    if (piecesDetails.AFlush64(new int[]{i, j}) && piecesDetails.AFlush64(new int[]{i + get(flag, m)[0], j + get(flag, m)[1]})) {
-                                        piecesDetails.AAlive4 = true;
-                                        piecesDetails.AALive4P.add(new int[]{i, j});
-                                        piecesDetails.AALive4P.add(new int[]{i + get(flag, m)[0], i + get(flag, m)[1]});
-                                        break;
-                                    } else if (!piecesDetails.AFlush64(new int[]{i, j}) && !piecesDetails.AFlush64(new int[]{i + get(flag, m)[0], j + get(flag, m)[1]}))
-                                        break;
-                                    else if (!piecesDetails.AFlush64(new int[]{i, j})) {
+                                    if (piecesDetails.Check(new int[]{i, j}, piecesDetails.Forbidden, 0, 1, 0, 1)) {
+                                        if (piecesDetails.Check(new int[]{i + get(flag, m)[0], j + get(flag, m)[1]}, piecesDetails.Forbidden, 0, 1, 0, 1)) {
+                                            piecesDetails.AAlive4 = true;
+                                            piecesDetails.AALive4P.add(new int[]{i, j});
+                                            piecesDetails.AALive4P.add(new int[]{i + get(flag, m)[0], i + get(flag, m)[1]});
+                                            break;
+                                        } else {
+                                            piecesDetails.AFlush4 = true;
+                                            piecesDetails.AFlush4P.add(new int[]{i, j});
+                                            break;
+                                        }
+                                    } else if (piecesDetails.Check(new int[]{i + get(flag, m)[0], j + get(flag, m)[1]}, piecesDetails.Forbidden, 0, 1, 0, 1)) {
                                         piecesDetails.AFlush4 = true;
                                         piecesDetails.AFlush4P.add(new int[]{i + get(flag, m)[0], j + get(flag, m)[1]});
-                                        break;
-                                    } else {
-                                        piecesDetails.AFlush4 = true;
-                                        piecesDetails.AFlush4P.add(new int[]{i, j});
                                         break;
                                     }
                                 } else {
@@ -255,7 +313,7 @@ public class Renju extends Frame {
                                     while (++Symbol <= m)
                                         if (Pieces[i + get(flag, Symbol)[0]][j + get(flag, Symbol)[1]] == State.Empty)
                                             break;
-                                    if (Actor != Forbidden || !FlagLong || piecesDetails.AFlush64(new int[]{i + get(flag, Symbol)[0], j + get(flag, Symbol)[1]})) {
+                                    if (Actor != Forbidden || !FlagLong || piecesDetails.Check(new int[]{i + get(flag, Symbol)[0], j + get(flag, Symbol)[1]}, piecesDetails.Forbidden, 0, 1, 0, 1)) {
                                         piecesDetails.AFlush4 = true;
                                         piecesDetails.AFlush4P.add(new int[]{i + get(flag, Symbol)[0], j + get(flag, Symbol)[1]});
                                     }
@@ -266,8 +324,13 @@ public class Renju extends Frame {
                             if (Ec == 4 && Pieces[i][j] == State.Empty && Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == State.Empty) {
                                 for (int s = 1; s < m; s++) {
                                     if (Pieces[i + get(flag, s)[0]][j + get(flag, s)[1]] == State.Empty)
-                                        piecesDetails.AAlive2P.add(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]});
+                                        piecesDetails.AFlush2P.add(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]});
                                 }
+                            }
+                            else if (Ec==3&&(Pieces[i][j]==opp&&Pieces[i+get(flag,1)[0]][j+get(flag,1)[1]]==current||Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == opp&&Pieces[i + get(flag, m-1)[0]][j + get(flag, m-1)[1]] == current)){  for (int s = 1; s < m; s++) {
+                                if (Pieces[i + get(flag, s)[0]][j + get(flag, s)[1]] == State.Empty)
+                                    piecesDetails.AAlive2P.add(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]});
+                            }
                             }
                         case 1:
                             if (Ec == 5 && Pieces[i][j] == State.Empty && Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == State.Empty) {
@@ -286,8 +349,60 @@ public class Renju extends Frame {
         PreScan(piecesDetailD, !Actor, Pieces);
         ComputerScan(piecesDetailA, Actor, Pieces);
         ComputerScan(piecesDetailD, !Actor, Pieces);
-        return new int[2];
+        if (piecesDetailA.AFlush6) return piecesDetailA.AFlush6P.get(0);
+        if (piecesDetailA.AFlush4) return piecesDetailA.AFlush4P.get(0);
+        if (piecesDetailA.AAlive4) return piecesDetailA.AALive4P.get(0);
+        if (piecesDetailD.AFlush6) return piecesDetailD.AFlush6P.get(0);
+        if (piecesDetailD.AFlush4) return piecesDetailD.AFlush4P.get(0);
+        if (piecesDetailD.AAlive4) return piecesDetailD.AALive4P.get(0);
+        if (piecesDetailA.AAlive3)
+            for (int i = 0; i < piecesDetailA.AALive3P.size(); i++) {
+                int[] bak = new int[]{piecesDetailA.AALive3P.get(i)[1], piecesDetailA.AALive3P.get(i)[2]};
+                if (piecesDetailA.Check(bak, piecesDetailA.Forbidden, 0, 1, 0, 1))
+                    return bak;
+            }
+        if (piecesDetailA.AFlush3) {
+            for (int k = 0; k < piecesDetailA.AFlush3P.size(); k += 2) {
+                int[] GetK = new int[]{piecesDetailA.AFlush3P.get(k)[1], piecesDetailA.AFlush3P.get(k)[2]};
+                int[] GetK1 = new int[]{piecesDetailA.AFlush3P.get(k + 1)[1], piecesDetailA.AFlush3P.get(k + 1)[2]};
+                if (piecesDetailA.Check(GetK, piecesDetailA.Forbidden, 0, 1, 0, 1)) {
+                    if (!piecesDetailA.Check(GetK, piecesDetailA.AAlive2P, 0, 1, 1, 2))
+                        if (piecesDetailD.Check(GetK1, piecesDetailD.AALive3P, 0, 1, 1, 2) || piecesDetailD.Check(GetK1, piecesDetailD.AFlush3P, 0, 1, 1, 2))
+                            return GetK;
+                }
+                if (piecesDetailA.Check(GetK1, piecesDetailA.Forbidden, 0, 1, 0, 1)) {
+                    if (!piecesDetailA.Check(GetK1, piecesDetailA.AAlive2P, 0, 1, 1, 2))
+                        if (piecesDetailD.Check(GetK, piecesDetailD.AALive3P, 0, 1, 1, 2) || piecesDetailD.Check(GetK, piecesDetailD.AFlush3P, 0, 1, 1, 2))
+                            return GetK1;
+                }
+            }
+        }
+        if (piecesDetailD.AAlive3) {
+            if (!piecesDetailA.AFlush3)
+                for (int i = 0; i < piecesDetailD.AALive3P.size(); i++) {
+                int[] Geti=new int[]{piecesDetailD.AALive3P.get(i)[1],piecesDetailD.AALive3P.get(i)[2]};
+                    if (piecesDetailD.Check(Geti, piecesDetailD.Forbidden,0,1,0,1))
+                        if (!piecesDetailD.Check(Geti,piecesDetailD.AFlush3P,0,1,1,2)||!piecesDetailD.Check3(piecesDetailD.AALive3P.get(i),piecesDetailD.AALive3P)||!piecesDetailD.Check3(piecesDetailD.AALive3P.get(i),piecesDetailD.AAlive2P))
+                            return Geti;
+
+                }
+            else {
+            }
+        }
+        ArrayList<int[]> Last = GetNear(PointsRecord.getLast());
+        return Last.get((int) (Math.random() * Last.size()));
     }
+
+    private ArrayList<int[]> GetNear(int[] last) {
+        ArrayList<int[]> re = new ArrayList<>();
+        int[] List = new int[]{-1, 0, 1};
+        for (int i : List)
+            for (int j : List)
+                if (last[1] + i >= 0 && last[1] + i < n && last[2] + j >= 0 && last[2] + j < n && Pieces[last[1] + i][last[2] + j] == State.Empty)
+                    re.add(new int[]{last[1] + i, last[2] + j});
+        return re;
+    }
+
 
     private void GameOver(Renju.State winner) {
         EndUI endUI = new EndUI(this, winner == State.Black ? "Black" : "White");
