@@ -5,6 +5,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
+
 import static java.lang.Integer.min;
 
 public class Renju extends Frame {
@@ -43,14 +45,14 @@ public class Renju extends Frame {
 
     public static native int[] AI();
 
-    void StartAhead() {
+    private void StartAhead() {
         IsAhead = true;
         ActorBak = Actor;
         StatementBak = Statement;
         PiecesBak = Pieces.clone();
     }
 
-    void StopAhead() {
+    private void StopAhead() {
         IsAhead = false;
         Actor = ActorBak;
         Statement = StatementBak;
@@ -106,7 +108,6 @@ public class Renju extends Frame {
         g.fillOval((2 + DropPoint[0]) * per - Oval, (2 + DropPoint[1]) * per - Oval, Oval * 2, Oval * 2);
         Pieces[DropPoint[0]][DropPoint[1]] = Actor ? Renju.State.White : Renju.State.Black;
         PreScan(piecesDetailA, Actor, Pieces);
-//        PreScan(piecesDetailD,!Actor);
         int[] Current = {Actor ? 1 : 0, DropPoint[0], DropPoint[1]};
         if (PointsRecord.size() + 1 == n * n) {
             EndUI endUI = new EndUI(this, "Nobody");
@@ -132,11 +133,11 @@ public class Renju extends Frame {
 
     //储存扫描棋盘后的详细信息
     class PiecesDetails {
-        Boolean WinFlag, LongForFlag, AFlush6, AAlive4, AAlive3, AFlush3, AFlush4;
-        ArrayList<int[]> Forbidden, Two3P, AFlush6P, AALive4P, AFlush4P, AALive3P, AFlush3P, AFlush2P, AAlive2P, AAlive1P;
+        Boolean WinFlag, For3Flag, LongForFlag, AFlush6, AAlive4, AAlive3, AFlush3, AFlush4, Two2;
+        ArrayList<int[]> Forbidden, Two3P, AFlush6P, AALive4P, AFlush4P, AALive3P, AFlush3P, AFlush2P, AAlive2P, AAlive1P, Two2P;
 
         PiecesDetails() {
-            WinFlag = LongForFlag = AAlive3 = AFlush3 = AAlive4 = AFlush4 = AFlush6 = false;
+            For3Flag = WinFlag = LongForFlag = AAlive3 = AFlush3 = AAlive4 = AFlush4 = AFlush6 = Two2 = false;
             Forbidden = new ArrayList<>();
             AFlush6P = new ArrayList<>();
             AALive4P = new ArrayList<>();
@@ -147,6 +148,7 @@ public class Renju extends Frame {
             AFlush2P = new ArrayList<>();
             AAlive1P = new ArrayList<>();
             Two3P = new ArrayList<>();
+            Two2P = new ArrayList<>();
         }
 
         boolean Check(int[] check, ArrayList<int[]> Text, final int a, final int b, final int c, final int d) {
@@ -158,12 +160,6 @@ public class Renju extends Frame {
             return true;
         }
 
-        boolean Check3(int[] check, ArrayList<int[]> Text) {
-            for (int[] text : Text)
-                if (text[0] != check[0] && text[1] == check[1] && text[2] == check[2])
-                    return false;
-            return true;
-        }
     }
 
     private boolean IsLegal(int x, int y) {
@@ -222,33 +218,61 @@ public class Renju extends Frame {
                             }
                             break;
                         case 3:
-                            if (Ec==2)
-                            if (Pieces[i][j] == opp && Pieces[i + get(flag, 1)[0]][j + get(flag, 1)[1]] == current
-                                    || Pieces[i + get(flag, m - 1)[0]][j + get(flag, m - 1)[1]] == current && Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == opp
-                                    ||Pieces[i][j]==opp&&(!IsLegal(i + get(flag, m+1)[0],j + get(flag, m+1)[1])||Pieces[i + get(flag, m+1)[0]][j + get(flag, m+1)[1]]==opp)||
-                                    Pieces[i+get(flag,m)[0]][j+get(flag,m)[1]]==opp&&(!IsLegal(i + get(flag, -1)[0],j + get(flag, -1)[1])||Pieces[i + get(flag, -1)[0]][j + get(flag, -1)[1]]==opp)) {
-                                piecesDetails.AFlush3 = true;
-                                for (int q = 0; q <= m; q++)
-                                    if (Pieces[i + get(flag, q)[0]][j + get(flag, q)[1]] == State.Empty)
-                                        piecesDetails.AFlush3P.add(new int[]{flag, i + get(flag, q)[0], j + get(flag, q)[1]});
-                            }
-                            if (Ec==3&&Pieces[i][j] == State.Empty && Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == State.Empty) {
+                            if (Ec == 2)
+                                if (Pieces[i][j] == opp && Pieces[i + get(flag, 1)[0]][j + get(flag, 1)[1]] == current
+                                        || Pieces[i + get(flag, m - 1)[0]][j + get(flag, m - 1)[1]] == current && Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == opp
+                                        || Pieces[i][j] == opp && (!IsLegal(i + get(flag, m + 1)[0], j + get(flag, m + 1)[1]) || Pieces[i + get(flag, m + 1)[0]][j + get(flag, m + 1)[1]] == opp)
+                                        || Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == opp && (!IsLegal(i + get(flag, -1)[0], j + get(flag, -1)[1]) || Pieces[i + get(flag, -1)[0]][j + get(flag, -1)[1]] == opp)) {
+                                    piecesDetails.AFlush3 = true;
+                                    for (int q = 0; q <= m; q++)
+                                        if (Pieces[i + get(flag, q)[0]][j + get(flag, q)[1]] == State.Empty)
+                                            piecesDetails.AFlush3P.add(new int[]{flag, i + get(flag, q)[0], j + get(flag, q)[1]});
+                                }
+                            if (Ec == 3 && Pieces[i][j] == State.Empty && Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == State.Empty) {
                                 piecesDetails.AAlive3 = true;
                                 for (int s = 1; s < m; s++) {
                                     if (Actor == Forbidden && FlagTwoAlive3 && Pieces[i + get(flag, s)[0]][j + get(flag, s)[1]] == current)
                                         piecesDetails.Two3P.add(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]});
                                     if (Pieces[i + get(flag, s)[0]][j + get(flag, s)[1]] == State.Empty)
-//                                                if (piecesDetails.Check3(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]}, piecesDetails.AALive3P))
                                         piecesDetails.AALive3P.add(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]});
                                 }
                             }
+                            break;
+                        case 2:
+                            if (Ec == 4 && Pieces[i][j] == State.Empty && Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == State.Empty) {
+                                for (int s = 1; s < m; s++) {
+                                    if (Pieces[i + get(flag, s)[0]][j + get(flag, s)[1]] == State.Empty)
+                                        piecesDetails.AAlive2P.add(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]});
+                                }
+                            } else if (Ec == 3 && (Pieces[i][j] == opp && Pieces[i + get(flag, 1)[0]][j + get(flag, 1)[1]] == current || Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == opp && Pieces[i + get(flag, m - 1)[0]][j + get(flag, m - 1)[1]] == current)) {
+                                for (int s = 1; s < m; s++) {
+                                    if (Pieces[i + get(flag, s)[0]][j + get(flag, s)[1]] == State.Empty)
+                                        piecesDetails.AFlush2P.add(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]});
+                                }
+                            }
+                            break;
                     }
                 }
         if (piecesDetails.Two3P.size() > 1)
             for (int t = 0; t < piecesDetails.Two3P.size(); t++)
                 for (int k = t + 1; k < piecesDetails.Two3P.size(); k++) {
-                    if (piecesDetails.Two3P.get(t)[0] != piecesDetails.Two3P.get(k)[0] && piecesDetails.Two3P.get(t)[1] == piecesDetails.Two3P.get(k)[1] && piecesDetails.Two3P.get(k)[2] == piecesDetails.Two3P.get(t)[2])
-                        ForbiddenHand();
+                    if (piecesDetails.Two3P.get(t)[0] != piecesDetails.Two3P.get(k)[0] && piecesDetails.Two3P.get(t)[1] == piecesDetails.Two3P.get(k)[1] && piecesDetails.Two3P.get(k)[2] == piecesDetails.Two3P.get(t)[2]) {
+                        if (!IsAhead)
+                            ForbiddenHand();
+                        else piecesDetails.For3Flag = true;
+                    }
+                }
+        if (piecesDetails.AAlive2P.size() > 1)
+            for (int t = 0; t < piecesDetails.AAlive2P.size(); t++)
+                for (int k = t + 1; k < piecesDetails.AAlive2P.size(); k++) {
+                    if (piecesDetails.AAlive2P.get(t)[0] != piecesDetails.AAlive2P.get(k)[0] && piecesDetails.AAlive2P.get(t)[1] == piecesDetails.AAlive2P.get(k)[1] && piecesDetails.AAlive2P.get(k)[2] == piecesDetails.AAlive2P.get(t)[2]) {
+                        if (FlagTwoAlive3 && Actor == Forbidden)
+                            piecesDetails.Forbidden.add(new int[]{piecesDetails.AAlive2P.get(t)[1], piecesDetails.AAlive2P.get(t)[2]});
+                        else {
+                            piecesDetails.Two2 = true;
+                            piecesDetails.Two2P.add(new int[]{piecesDetails.AAlive2P.get(t)[1], piecesDetails.AAlive2P.get(t)[2]});
+                        }
+                    }
                 }
     }
 
@@ -323,18 +347,6 @@ public class Renju extends Frame {
                                         }
                             }
                             break;
-                        case 2:
-                            if (Ec == 4 && Pieces[i][j] == State.Empty && Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == State.Empty) {
-                                for (int s = 1; s < m; s++) {
-                                    if (Pieces[i + get(flag, s)[0]][j + get(flag, s)[1]] == State.Empty)
-                                        piecesDetails.AAlive2P.add(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]});
-                                }
-                            } else if (Ec == 3 && (Pieces[i][j] == opp && Pieces[i + get(flag, 1)[0]][j + get(flag, 1)[1]] == current || Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == opp && Pieces[i + get(flag, m - 1)[0]][j + get(flag, m - 1)[1]] == current)) {
-                                for (int s = 1; s < m; s++) {
-                                    if (Pieces[i + get(flag, s)[0]][j + get(flag, s)[1]] == State.Empty)
-                                        piecesDetails.AFlush2P.add(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]});
-                                }
-                            }
                         case 1:
                             if (Ec == 5 && Pieces[i][j] == State.Empty && Pieces[i + get(flag, m)[0]][j + get(flag, m)[1]] == State.Empty) {
                                 for (int s = 1; s < m; s++) {
@@ -342,12 +354,14 @@ public class Renju extends Frame {
                                         piecesDetails.AAlive1P.add(new int[]{flag, i + get(flag, s)[0], j + get(flag, s)[1]});
                                 }
                             }
+                            break;
 
                     }
                 }
     }
 
     int[] ComputerJudge(PiecesDetails piecesDetailA, PiecesDetails piecesDetailD) {
+        if (PointsRecord.isEmpty()) return new int[]{7, 7};
         PreScan(piecesDetailA, Actor, Pieces);
         PreScan(piecesDetailD, !Actor, Pieces);
         ComputerScan(piecesDetailA, Actor, Pieces);
@@ -378,20 +392,18 @@ public class Renju extends Frame {
                     if (!piecesDetailD.Check(Arr0, piecesDetailD.AALive3P, 0, 1, 1, 2)) {
                         Optional.add(Geti);
                         Optional.add(new int[]{Geti[0], Arr0[0], Arr0[1]});
-                    }
-                    else {
+                    } else {
                         Optional.add(Geti);
-                        Optional.add(new int[]{Geti[0],Geti[1] + get(Geti[0], -1)[0], Geti[2] + get(Geti[0], - 1)[1]});
+                        Optional.add(new int[]{Geti[0], Geti[1] + get(Geti[0], -1)[0], Geti[2] + get(Geti[0], -1)[1]});
                     }
                     Tag = true;
                 } else if (Pieces[Geti[1] + get(Geti[0], 1)[0]][Geti[2] + get(Geti[0], 1)[1]] == State.Empty) {
                     if (!piecesDetailD.Check(Arr1, piecesDetailD.AALive3P, 0, 1, 1, 2)) {
                         Optional.add(Geti);
                         Optional.add(new int[]{Geti[0], Arr1[0], Arr1[1]});
-                    }
-                    else {
+                    } else {
                         Optional.add(Geti);
-                        Optional.add(new int[]{Geti[0],Geti[1] + get(Geti[0], 1)[0], Geti[2] + get(Geti[0],  1)[1]});
+                        Optional.add(new int[]{Geti[0], Geti[1] + get(Geti[0], 1)[0], Geti[2] + get(Geti[0], 1)[1]});
                     }
                     Tag = true;
                 }
@@ -425,30 +437,131 @@ public class Renju extends Frame {
         int[] AD43 = Check43(piecesDetailD, piecesDetailA);
         if (AD43[0] != -1)
             return AD43;
+        int[] AA33 = Check33(Actor, piecesDetailA);
+        if (AA33[0] != -1) {
+            return AA33;
+        }
+        int[] AD33 = Check33(!Actor, piecesDetailD);
+        if (AD33[0] != -1) {
+            return AD33;
+        }
+        int[] PreAA = CheckPre(Actor, piecesDetailA);
+        if (PreAA[0] != -1)
+            return PreAA;
+//        int[] AA2 = Check2(Actor,piecesDetailA.AAlive2P, piecesDetailA);
+//        if (AA2[0] != -1) {
+//            return AA2;
+//        }
+        int[] PreAD = CheckPre(!Actor, piecesDetailD);
+        if (PreAD[0] != -1)
+            return PreAD;
+        if (piecesDetailD.AAlive2P.size()>=piecesDetailA.AAlive2P.size()) {
+            int[] AD2 = Check2(!Actor, true, piecesDetailD.AAlive2P);
+            if (AD2[0] != -1)
+                return AD2;
+        }
+        else {
+            int[] AA2 = Check2(Actor, false, piecesDetailA.AAlive2P);
+            if (AA2[0] != -1)
+                return AA2;
+        }
 
-
+//        int[] AA1 = Check2(Actor, piecesDetailA.AAlive1P);
+//        if (AA1[0] != -1) {
+//            return AA1;
+//        }
         ArrayList<int[]> Last = GetNear(PointsRecord.getLast());
-        return Last.get((int) (Math.random() * Last.size()));
+        return Last.get((int)(Math.random()*Last.size()));
     }
-//    private int[] Check33(PiecesDetails piecesDetailA, PiecesDetails piecesDetailD) {
-//
-//    }
-    private int[] Check43(PiecesDetails piecesDetailA, PiecesDetails piecesDetailD) {
-       if (piecesDetailA.AFlush3)
-        for (int k = 0; k < piecesDetailA.AFlush3P.size(); k += 2) {
-            int[] GetK = new int[]{piecesDetailA.AFlush3P.get(k)[1], piecesDetailA.AFlush3P.get(k)[2]};
-            int[] GetK1 = new int[]{piecesDetailA.AFlush3P.get(k + 1)[1], piecesDetailA.AFlush3P.get(k + 1)[2]};
-            if (piecesDetailA.Check(GetK, piecesDetailA.Forbidden, 0, 1, 0, 1)) {
-                if (!piecesDetailA.Check(GetK, piecesDetailA.AAlive2P, 0, 1, 1, 2))
-                    if (piecesDetailD.Check(GetK1, piecesDetailD.AALive3P, 0, 1, 1, 2) && piecesDetailD.Check(GetK1, piecesDetailD.AFlush3P, 0, 1, 1, 2))
-                        return GetK;
+
+    private int[] CheckPre(boolean Actor, PiecesDetails piecesDetailA) {
+        final short Max=10;
+        if (piecesDetailA.AAlive1P.size() > 0&&piecesDetailA.AAlive2P.size()<=Max) {
+            StartAhead();
+            for (int[] i : piecesDetailA.AAlive1P) {
+                Pieces[i[1]][i[2]] = Actor ? State.White : State.Black;
+                PiecesDetails AheadA = new PiecesDetails();
+                PiecesDetails AheadD = new PiecesDetails();
+                PreScan(AheadA, Actor, Pieces);
+                PreScan(AheadD, !Actor, Pieces);
+                int[] A43 = Check43(AheadA, AheadD);
+                int[] A33 = Check33(Actor,AheadA);
+                Pieces[i[1]][i[2]] =State.Empty;
+                if (A43[0] != -1){
+                    StopAhead();
+                    return A43;
+                }
+                if (A33[0] != -1){
+                    StopAhead();
+                    return A33;
+                }
             }
-            if (piecesDetailA.Check(GetK1, piecesDetailA.Forbidden, 0, 1, 0, 1)) {
-                if (!piecesDetailA.Check(GetK1, piecesDetailA.AAlive2P, 0, 1, 1, 2))
-                    if (piecesDetailD.Check(GetK, piecesDetailD.AALive3P, 0, 1, 1, 2) && piecesDetailD.Check(GetK, piecesDetailD.AFlush3P, 0, 1, 1, 2))
-                        return GetK1;
+            StopAhead();
+        }
+        return new int[]{-1,-1};
+    }
+
+    private int[] Check2(boolean Actor,boolean judge, ArrayList<int[]> L) {
+        ArrayList<Integer> List = new ArrayList<>();
+        if (L.size() > 0) {
+            //   int Pre=L.size();
+            StartAhead();
+            for (int[] aL : L) {
+                Pieces[aL[1]][aL[2]] = !Actor ? State.White : State.Black;
+                PiecesDetails Ahead = new PiecesDetails();
+                PreScan(Ahead, Actor, Pieces);
+                List.add(Ahead.AAlive2P.size());
+                Pieces[aL[1]][aL[2]] = State.Empty;
+            }
+            StopAhead();
+            return new int[]{L.get(GetM(List,judge))[1], L.get(GetM(List,judge))[2]};
+        }
+        return new int[]{-1, -1};
+    }
+
+    private int GetM(ArrayList<Integer> list,boolean judge) {
+        int m = list.get(0);
+        int re = 0;
+        for (int i = 0; i < list.size(); i++) {
+            if (judge) {
+                if (m > list.get(i)) {
+                    re = i;
+                    m = list.get(i);
+                }
+            }
+            else {
+                if (m < list.get(i)) {
+                    re = i;
+                    m = list.get(i);
+                }
             }
         }
+        return re;
+    }
+
+    private int[] Check33(boolean Actor, PiecesDetails piecesDetails) {
+        if (!FlagTwoAlive3 || (Actor != Forbidden)) {
+            if (piecesDetails.Two2) return piecesDetails.Two2P.get(0);
+        }
+        return new int[]{-1, -1};
+    }
+
+    private int[] Check43(PiecesDetails piecesDetailA, PiecesDetails piecesDetailD) {
+        if (piecesDetailA.AFlush3)
+            for (int k = 0; k < piecesDetailA.AFlush3P.size(); k += 2) {
+                int[] GetK = new int[]{piecesDetailA.AFlush3P.get(k)[1], piecesDetailA.AFlush3P.get(k)[2]};
+                int[] GetK1 = new int[]{piecesDetailA.AFlush3P.get(k + 1)[1], piecesDetailA.AFlush3P.get(k + 1)[2]};
+                if (piecesDetailA.Check(GetK, piecesDetailA.Forbidden, 0, 1, 0, 1)) {
+                    if (!piecesDetailA.Check(GetK, piecesDetailA.AAlive2P, 0, 1, 1, 2))
+                        if (piecesDetailD.Check(GetK1, piecesDetailD.AALive3P, 0, 1, 1, 2) && piecesDetailD.Check(GetK1, piecesDetailD.AFlush3P, 0, 1, 1, 2))
+                            return GetK;
+                }
+                if (piecesDetailA.Check(GetK1, piecesDetailA.Forbidden, 0, 1, 0, 1)) {
+                    if (!piecesDetailA.Check(GetK1, piecesDetailA.AAlive2P, 0, 1, 1, 2))
+                        if (piecesDetailD.Check(GetK, piecesDetailD.AALive3P, 0, 1, 1, 2) && piecesDetailD.Check(GetK, piecesDetailD.AFlush3P, 0, 1, 1, 2))
+                            return GetK1;
+                }
+            }
         return new int[]{-1, -1};
     }
 
